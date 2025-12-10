@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>12 OAC Days of Christmas Advent Calendar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #020617;
+      --card: #0f172a;
+      --border: #1f2937;
+      --accent: #f97316;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --danger: #fca5a5;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+      background: radial-gradient(circle at top, #8ec5fc 0%, #e0c3fc 35%, #ffffff 100%);
+      color: var(--text);
+      animation: skyGlow 10s ease-in-out infinite alternate;
+    }
+
+    @keyframes skyGlow {
+      0% { filter: brightness(1); }
+      100% { filter: brightness(1.1); }
+    }
+
+    h1, h2, h3 {
+      text-shadow: 0 0 6px rgba(255,255,255,0.8);
+    }
+
+    .app {
+      width: 100%;
+      max-width: 1100px;
+      padding: 24px 16px 40px;
+      margin: 0 auto;
+    }
+
+    .app-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .title-block h1 { margin: 0; font-size: 1.8rem; }
+    .title-block p { margin: 4px 0 0; font-size: 0.9rem; color: var(--muted); }
+
+    .view-toggle {
+      display: flex;
+      padding: 4px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--border);
+    }
+
+    .toggle-btn {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .toggle-btn.active {
+      background: var(--accent);
+      color: #020617;
+    }
+
+    .toggle-btn:not(.active):hover {
+      background: rgba(148, 163, 184, 0.15);
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1.2fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .content { grid-template-columns: minmax(0, 1fr); }
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      padding: 18px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.7);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card h2 { margin: 0 0 8px; font-size: 1.1rem; }
+    .card p { margin: 0 0 10px; font-size: 0.85rem; color: var(--muted); }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .calendar-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+
+    .door {
+      position: relative;
+      border-radius: 18px;
+      background: linear-gradient(145deg, #4f7ac8, #6da0ea);
+      border: 3px solid rgba(255,255,255,0.7);
+      box-shadow:
+        0 0 0 4px rgba(255,255,255,0.2) inset,
+        0 8px 18px rgba(0,0,0,0.35),
+        0 0 25px rgba(255,255,255,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 10px;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(.18,1.4,.36,1), box-shadow 0.25s;
+      overflow: hidden;
+    }
+
+    .door:hover:not(.door-locked) {
+      transform: translateY(-6px) scale(1.05);
+      box-shadow:
+        0 0 0 6px rgba(255,255,255,0.4) inset,
+        0 12px 22px rgba(0,0,0,0.45),
+        0 0 40px rgba(255,255,255,0.8);
+    }
+
+    .door-locked { opacity: 0.6; cursor: default; }
+
+    .door-icon { font-size: 1.9rem; margin-bottom: 4px; }
+    .door-number { font-size: 1.2rem; font-weight: 700; }
+    .door-label { font-size: 0.8rem; color: var(--muted); text-align: center; }
+
+    .door-type {
+      font-size: 0.75rem;
+      border-radius: 999px;
+      padding: 2px 8px;
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .door small { font-size: 0.7rem; }
+
+    .admin-form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 16px;
+      margin-top: 8px;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 800px) {
+      .admin-form { grid-template-columns: minmax(0, 1fr); }
+    }
+
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    label { color: var(--muted); font-size: 0.8rem; }
+
+    select, input[type="text"], input[type="date"], textarea {
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.95);
+      padding: 7px 9px;
+      color: var(--text);
+      font: inherit;
+      outline: none;
+      min-height: 35px;
+    }
+
+    textarea { resize: vertical; min-height: 60px; }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.4);
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 8px 16px;
+      border: none;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent);
+      color: #020617;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(249, 115, 22, 0.35);
+      margin-top: 4px;
+    }
+
+    .btn-secondary {
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(30, 64, 175, 0.5);
+      color: #e5e7eb;
+      border-color: rgba(59, 130, 246, 0.7);
+    }
+
+    .btn:hover { filter: brightness(1.05); }
+
+    .status-line {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      grid-column: 1 / -1;
+    }
+
+    .error-text { color: var(--danger); }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 4000;
+      padding: 16px;
+    }
+
+    .modal {
+      background: rgba(15, 23, 42, 0.98);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.9);
+    }
+
+    .modal-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-header h2 { margin: 0; font-size: 1rem; }
+    .modal-body { padding: 12px 16px 16px; overflow: auto; font-size: 0.9rem; }
+
+    .modal-footer {
+      padding: 8px 16px 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .modal-close {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .modal-close:hover {
+      background: rgba(30, 64, 175, 0.7);
+      color: #e5e7eb;
+    }
+
+    #loginModalBackdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 5000;
+    }
+
+    #loginModal {
+      background: #0f172a;
+      border: 1px solid #374151;
+      padding: 20px;
+      border-radius: 12px;
+      width: 300px;
+      color: #e5e7eb;
+    }
+
+    #loginModal h3 { margin: 0 0 10px; font-size: 1rem; }
+
+    #loginModal input {
+      width: 100%;
+      padding: 7px 9px;
+      border-radius: 8px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      margin-top: 4px;
+    }
+
+    #loginModal input:focus { border-color: var(--accent); outline: none; }
+
+    #loginSubmit {
+      margin-top: 10px;
+      width: 100%;
+      border-radius: 999px;
+      padding: 8px 0;
+      border: none;
+      background: var(--accent);
+      color: #020617;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    #loginError {
+      color: var(--danger);
+      font-size: 0.78rem;
+      min-height: 16px;
+      margin-top: 4px;
+    }
+
+    /* Splash screen */
+    #splashScreen {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 6000;
+      overflow: hidden;
+    }
+
+    #snowCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    #splashContent {
+      position: relative;
+      text-align: center;
+      color: white;
+      z-index: 10;
+      animation: fadeIn 1.5s ease forwards;
+      padding: 0 20px;
+    }
+
+    /* Bigger splash logo */
+    #splashLogo {
+      width: 420px;
+      max-width: 90%;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    #splashContent h1 {
+      margin: 0 0 8px;
+      font-size: 1.6rem;
+    }
+
+    #splashContent p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #e5e7eb;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Frost & magic effects */
+    .door-frost {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(255,255,255,0.35) 0px,
+        rgba(255,255,255,0.25) 2px,
+        transparent 4px
+      );
+      filter: blur(2px) brightness(1.4);
+      opacity: 0;
+      transition: opacity 2.2s ease-in-out;
+      z-index: 4;
+    }
+
+    .door-frost.visible {
+      opacity: 1;
+      animation: frostGlow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes frostGlow {
+      0% { filter: blur(1px) brightness(1.2); }
+      100% { filter: blur(2px) brightness(1.6); }
+    }
+
+    @keyframes meltAway {
+      0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0px) brightness(1.2);
+      }
+      40% {
+        opacity: 0.9;
+        transform: translateY(8px) scale(1.05);
+      }
+      80% {
+        opacity: 0.4;
+        filter: blur(3px);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(30px) scale(0.85);
+        filter: blur(6px);
+      }
+    }
+
+    .door-melt {
+      animation: meltAway 1.4s cubic-bezier(.32,1.4,.52,1) forwards;
+    }
+
+    @keyframes popOpen {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+      70% { transform: scale(0.97); }
+      100% { transform: scale(1); }
+    }
+
+    .sparkle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: radial-gradient(circle, #fff 0%, #ffe28a 45%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0;
+      animation: sparkleFloat 2.2s ease-in-out forwards;
+      z-index: 5001;
+    }
+
+    @keyframes sparkleFloat {
+      0% { transform: translateY(0) scale(0.3); opacity: 0; }
+      25% { opacity: 1; }
+      75% { transform: translateY(-24px) scale(1); opacity: 0.8; }
+      100% { transform: translateY(-40px) scale(0); opacity: 0; }
+    }
+
+    .heart {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: radial-gradient(circle at 30% 30%, #fff 0%, #ff7aa2 40%, #ff477e 70%);
+      transform: rotate(45deg);
+      border-radius: 50% 50% 0 50%;
+      pointer-events: none;
+      opacity: 0;
+      animation: heartFloat 2s ease-out forwards;
+      z-index: 5001;
+    }
+
+    .heart::before,
+    .heart::after {
+      content: "";
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: inherit;
+      border-radius: 50%;
+    }
+
+    .heart::before { top: -5px; left: 0; }
+    .heart::after { left: -5px; top: 0; }
+
+    @keyframes heartFloat {
+      0% { opacity: 0; transform: translateY(0) scale(0.4) rotate(45deg); }
+      20% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-30px) scale(1) rotate(45deg); }
+    }
+
+    .ice-burst {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at 20% 0%, rgba(255,255,255,0.7), transparent 60%),
+        radial-gradient(circle at 80% 20%, rgba(191,219,254,0.9), transparent 65%);
+      opacity: 0;
+      animation: iceBurst 0.9s ease-out forwards;
+      z-index: 5;
+    }
+
+    @keyframes iceBurst {
+      0% { opacity: 0; transform: scale(0.5); filter: blur(4px); }
+      40% { opacity: 1; transform: scale(1); filter: blur(0px); }
+      100% { opacity: 0; transform: scale(1.1); filter: blur(3px); }
+    }
+
+    #disneyMascot {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 5500;
+    }
+
+    #mascotFace {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffffff 0%, #f1f5f9 70%);
+      border: 2px solid #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
+
+    #mascotSpeech {
+      background: rgba(15,23,42,0.9);
+      border-radius: 16px;
+      padding: 8px 12px;
+      border: 1px solid rgba(148,163,184,0.6);
+      color: #e5e7eb;
+      font-size: 0.8rem;
+      max-width: 220px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Splash Screen -->
+  <div id="splashScreen">
+    <canvas id="snowCanvas"></canvas>
+    <div id="splashContent">
+      <img src="assets/splash.png" alt="Welcome" id="splashLogo">
+      <h1>Welcome to the 12 OAC Days of Christmas</h1>
+      <p>Loading your festive Disney magic…</p>
+    </div>
+  </div>
+
+  <div class="app">
+    <header class="app-header">
+      <div class="title-block">
+        <h1>12 OAC Days of Christmas</h1>
+        <p>A magical Disney-style advent calendar with surprises behind every door.</p>
+      </div>
+      <div class="view-toggle" id="viewToggle">
+        <button class="toggle-btn active" data-view="calendar">Calendar</button>
+        <button class="toggle-btn" data-view="admin" id="adminButton">Admin</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- Calendar -->
+      <section class="card" id="calendarCard">
+        <h2>Your 12 Doors</h2>
+        <p>Each day is themed around the Twelve Days of Christmas. Click to reveal the magic.</p>
+        <div class="calendar-grid" id="calendarGrid"></div>
+      </section>
+
+      <!-- Admin Panel -->
+      <section class="card" id="adminCard" style="display:none;">
+        <h2>Admin Panel</h2>
+        <p>Configure unlock dates and content (text, PDF, YouTube, image, or link).</p>
+
+        <form id="adminForm" class="admin-form">
+          <div class="field">
+            <label for="daySelect">Select Day</label>
+            <select id="daySelect"></select>
+          </div>
+
+          <div class="field">
+            <label for="unlockDate">Unlock Date</label>
+            <input type="date" id="unlockDate">
+          </div>
+
+          <div class="field">
+            <label for="titleInput">Door Title</label>
+            <input type="text" id="titleInput">
+          </div>
+
+          <div class="field">
+            <label for="descriptionInput">Description / Message</label>
+            <textarea id="descriptionInput"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="typeSelect">Content Type</label>
+            <select id="typeSelect">
+              <option value="text">Text</option>
+              <option value="pdf">PDF</option>
+              <option value="youtube">YouTube</option>
+              <option value="link">Link</option>
+              <option value="image">Image</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="urlInput">
+              Content URL
+              <small style="display:block;color:#6b7280;font-size:0.75rem;">
+                For a local PDF, use a path like <code>assets/pdfs/yourfile.pdf</code>
+              </small>
+            </label>
+            <input type="text" id="urlInput">
+          </div>
+
+          <div class="field">
+            <button type="submit" class="btn">Save Day</button>
+          </div>
+
+          <div class="field">
+            <button type="button" class="btn btn-secondary" id="testPdfBtn">
+              Test PDF
+            </button>
+          </div>
+
+          <div class="field">
+            <button type="button" class="btn btn-secondary" id="resetDayBtn">Reset Day</button>
+          </div>
+
+          <div class="status-line" id="adminStatus"></div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!-- Door Content Modal -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Door</h2>
+        <button id="modalCloseBtn" class="modal-close">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer">
+        <button id="modalCloseBtn2" class="modal-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Login Modal -->
+  <div id="loginModalBackdrop">
+    <div id="loginModal">
+      <h3 id="loginMessage">Admin Login</h3>
+      <input type="password" id="loginPassword" placeholder="Password" />
+      <div id="loginError"></div>
+      <button id="loginSubmit">Continue</button>
+    </div>
+  </div>
+
+  <!-- Mascot -->
+  <div id="disneyMascot">
+    <div id="mascotFace">⛄</div>
+    <div id="mascotSpeech">Click a door to reveal the magic!</div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "oacAdventItems_v1";
+    const FIXED_ADMIN_PASSWORD = "SantaPants";
+
+    function defaultDay(day) {
+      const themes = {
+        1: { title: "A Partridge in a Pear Tree", description: "The first festive gift – symbolising love and hope." },
+        2: { title: "Two Turtle Doves", description: "A symbol of peace, friendship, and togetherness." },
+        3: { title: "Three French Hens", description: "These hens represent generosity, faith, and love." },
+        4: { title: "Four Calling Birds", description: "Joy and good news carried on the wings of birds." },
+        5: { title: "Five Gold Rings", description: "A shining moment — celebrating beauty and generosity." },
+        6: { title: "Six Geese a-Laying", description: "Representing creation, abundance, and new beginnings." },
+        7: { title: "Seven Swans a-Swimming", description: "Grace and calm in the heart of the festive season." },
+        8: { title: "Eight Maids a-Milking", description: "A tribute to simple joys and daily kindness." },
+        9: { title: "Nine Ladies Dancing", description: "Let joy dance through your day!" },
+        10: { title: "Ten Lords a-Leaping", description: "Energy and excitement leap into today’s door." },
+        11: { title: "Eleven Pipers Piping", description: "Music fills the air — enjoy the festive sound!" },
+        12: { title: "Twelve Drummers Drumming", description: "A grand finale of rhythm, joy, and celebration!" }
+      };
+      const base = themes[day] || { title: "Day " + day, description: "A festive surprise awaits!" };
+      return {
+        day,
+        title: base.title,
+        description: base.description,
+        type: "text",
+        url: "",
+        unlockDate: "",
+        opened: false
+      };
+    }
+
+    function getDayIcon(n) {
+      return {
+        1: "🍐", 2: "🕊️", 3: "🐔", 4: "🐦",
+        5: "💍", 6: "🦆", 7: "🦢", 8: "🥛",
+        9: "💃", 10: "🤸‍♂️", 11: "🎺", 12: "🥁"
+      }[n] || "🎄";
+    }
+
+    function loadDays() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return Array.from({ length: 12 }, (_, i) => defaultDay(i + 1));
+      try {
+        const saved = JSON.parse(raw);
+        const map = new Map(saved.map(d => [d.day, d]));
+        return Array.from({ length: 12 }, (_, i) => ({
+          ...defaultDay(i + 1),
+          ...(map.get(i + 1) || {})
+        }));
+      } catch {
+        return Array.from({ length: 12 }, (_, i) => defaultDay(i + 1));
+      }
+    }
+
+    function saveDays(days) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(days));
+    }
+
+    let days = loadDays();
+    let adminUnlocked = false;
+    let currentView = "calendar";
+
+    const calendarGrid = document.getElementById("calendarGrid");
+    const adminCard = document.getElementById("adminCard");
+    const calendarCard = document.getElementById("calendarCard");
+    const viewToggle = document.getElementById("viewToggle");
+    const adminButton = document.getElementById("adminButton");
+
+    const daySelect = document.getElementById("daySelect");
+    const unlockDateInput = document.getElementById("unlockDate");
+    const titleInput = document.getElementById("titleInput");
+    const descriptionInput = document.getElementById("descriptionInput");
+    const typeSelect = document.getElementById("typeSelect");
+    const urlInput = document.getElementById("urlInput");
+    const adminForm = document.getElementById("adminForm");
+    const resetDayBtn = document.getElementById("resetDayBtn");
+    const adminStatus = document.getElementById("adminStatus");
+    const testPdfBtn = document.getElementById("testPdfBtn");
+
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalBody = document.getElementById("modalBody");
+    const modalCloseBtn = document.getElementById("modalCloseBtn");
+    const modalCloseBtn2 = document.getElementById("modalCloseBtn2");
+
+    const loginModalBackdrop = document.getElementById("loginModalBackdrop");
+    const loginMessage = document.getElementById("loginMessage");
+    const loginPassword = document.getElementById("loginPassword");
+    const loginError = document.getElementById("loginError");
+    const loginSubmit = document.getElementById("loginSubmit");
+
+    const splash = document.getElementById("splashScreen");
+    const splashCanvas = document.getElementById("snowCanvas");
+    const splashCtx = splashCanvas.getContext("2d");
+
+    function mascotSay(text) {
+      const speech = document.getElementById("mascotSpeech");
+      if (speech) speech.textContent = text;
+    }
+
+    function setStatus(message, isError = false) {
+      adminStatus.textContent = message || "";
+      adminStatus.classList.toggle("error-text", isError);
+    }
+
+    // Fixed admin password login
+    function showAdminLogin() {
+      loginPassword.value = "";
+      loginError.textContent = "";
+      loginMessage.textContent = "Enter admin password:";
+
+      loginModalBackdrop.style.display = "flex";
+
+      loginSubmit.onclick = () => {
+        const input = loginPassword.value.trim();
+        if (!input) {
+          loginError.textContent = "Please enter a password.";
+          return;
+        }
+
+        if (input === FIXED_ADMIN_PASSWORD) {
+          adminUnlocked = true;
+          loginModalBackdrop.style.display = "none";
+          mascotSay("Welcome back, Christmas wizard!");
+          switchView("admin");
+        } else {
+          loginError.textContent = "Incorrect password.";
+        }
+      };
+    }
+
+    function switchView(view) {
+      currentView = view;
+      updateView();
+    }
+
+    function updateView() {
+      document.querySelectorAll(".toggle-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.view === currentView);
+      });
+
+      calendarCard.style.display = currentView === "calendar" ? "block" : "none";
+      adminCard.style.display = currentView === "admin" ? "block" : "none";
+    }
+
+    adminButton.addEventListener("click", () => {
+      if (!adminUnlocked) showAdminLogin();
+      else switchView("admin");
+    });
+
+    viewToggle.addEventListener("click", e => {
+      const btn = e.target.closest(".toggle-btn");
+      if (!btn) return;
+      if (btn.dataset.view === "admin" && !adminUnlocked) {
+        showAdminLogin();
+        return;
+      }
+      switchView(btn.dataset.view);
+    });
+
+    function isDoorUnlocked(day) {
+      if (!day.unlockDate) return true;
+      const now = new Date(); now.setHours(0,0,0,0);
+      const unlock = new Date(day.unlockDate); unlock.setHours(0,0,0,0);
+      return now >= unlock;
+    }
+
+    function renderCalendar() {
+      calendarGrid.innerHTML = "";
+      days.forEach(day => {
+        const div = document.createElement("div");
+        div.className = "door";
+        const unlocked = isDoorUnlocked(day);
+        if (!unlocked) div.classList.add("door-locked");
+        div.innerHTML = `
+          <div class="door-icon">${getDayIcon(day.day)}</div>
+          <div class="door-number">${day.day}</div>
+          <div class="door-label">${day.title}</div>
+          <div class="door-type">${day.type}</div>
+          <small style="color:${unlocked ? "#4ade80" : "#f87171"}">
+            ${unlocked ? "Unlocked" : "Locked"}
+          </small>
+        `;
+        if (unlocked) div.addEventListener("click", () => openDoor(day.day));
+        calendarGrid.appendChild(div);
+      });
+    }
+
+    function initAdminForm() {
+      daySelect.innerHTML = "";
+      for (let i = 1; i <= 12; i++) {
+        const opt = document.createElement("option");
+        opt.value = i;
+        opt.textContent = "Day " + i;
+        daySelect.appendChild(opt);
+      }
+      loadDayIntoForm(1);
+    }
+
+    function loadDayIntoForm(n) {
+      const d = days.find(x => x.day === n);
+      if (!d) return;
+      daySelect.value = n;
+      unlockDateInput.value = d.unlockDate || "";
+      titleInput.value = d.title || "";
+      descriptionInput.value = d.description || "";
+      typeSelect.value = d.type || "text";
+      urlInput.value = d.url || "";
+      setStatus(`Editing Day ${n}.`);
+    }
+
+    daySelect.addEventListener("change", () => loadDayIntoForm(Number(daySelect.value)));
+
+    adminForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const n = Number(daySelect.value);
+      const d = days.find(x => x.day === n);
+      d.unlockDate = unlockDateInput.value;
+      d.title = titleInput.value.trim() || d.title;
+      d.description = descriptionInput.value.trim();
+      d.type = typeSelect.value;
+      d.url = urlInput.value.trim();
+      saveDays(days);
+      renderCalendar();
+      attachFrostEffect();
+      attachDoorHoverMagic();
+      setStatus(`Day ${n} saved.`);
+    });
+
+    resetDayBtn.addEventListener("click", () => {
+      const n = Number(daySelect.value);
+      const newDay = defaultDay(n);
+      const existing = days.find(x => x.day === n);
+      if (existing) newDay.opened = existing.opened;
+      days = days.map(d => d.day === n ? newDay : d);
+      saveDays(days);
+      loadDayIntoForm(n);
+      renderCalendar();
+      attachFrostEffect();
+      attachDoorHoverMagic();
+      setStatus(`Day ${n} reset to themed default.`);
+    });
+
+    // Test PDF button logic
+    if (testPdfBtn) {
+      testPdfBtn.addEventListener("click", () => {
+        const type = typeSelect.value;
+        const url = urlInput.value.trim();
+
+        if (type !== "pdf") {
+          alert("To test a PDF, set the content type to PDF first.");
+          return;
+        }
+
+        if (!url) {
+          alert("Please enter a PDF path, e.g. assets/pdfs/example.pdf");
+          return;
+        }
+
+        try {
+          window.open(url, "_blank");
+        } catch (err) {
+          alert("Could not open PDF. Please check your path.");
+          console.error("PDF Test Error:", err);
+        }
+      });
+    }
+
+    function extractYouTubeId(url) {
+      try {
+        const u = new URL(url);
+        if (u.hostname === "youtu.be") return u.pathname.substring(1);
+        return u.searchParams.get("v");
+      } catch {
+        const m = url.match(/(?:v=|youtu\.be\/|\/embed\/)([A-Za-z0-9_-]{6,})/);
+        return m ? m[1] : null;
+      }
+    }
+
+    function showModal() {
+      modalBackdrop.style.display = "flex";
+    }
+
+    function closeModal() {
+      modalBackdrop.style.display = "none";
+      modalBody.innerHTML = "";
+    }
+
+    modalCloseBtn.onclick = closeModal;
+    modalCloseBtn2.onclick = closeModal;
+    modalBackdrop.addEventListener("click", e => {
+      if (e.target === modalBackdrop) closeModal();
+    });
+
+    function spawnSparkles(x, y, count = 8) {
+      for (let i = 0; i < count; i++) {
+        const s = document.createElement("div");
+        s.className = "sparkle";
+        s.style.left = (x + (Math.random() * 20 - 10)) + "px";
+        s.style.top = (y + (Math.random() * 10 - 5)) + "px";
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 2500);
+      }
+    }
+
+    function spawnHearts(x, y, count = 4) {
+      for (let i = 0; i < count; i++) {
+        const h = document.createElement("div");
+        h.className = "heart";
+        h.style.left = (x + (Math.random() * 16 - 8)) + "px";
+        h.style.top = (y + (Math.random() * 8 - 4)) + "px";
+        document.body.appendChild(h);
+        setTimeout(() => h.remove(), 2200);
+      }
+    }
+
+    function iceBurstOnDoor(doorEl) {
+      const burst = document.createElement("div");
+      burst.className = "ice-burst";
+      doorEl.appendChild(burst);
+      setTimeout(() => burst.remove(), 900);
+    }
+
+    function attachDoorHoverMagic() {
+      document.querySelectorAll(".door").forEach(door => {
+        door.addEventListener("mouseenter", () => {
+          const rect = door.getBoundingClientRect();
+          const x = rect.left + rect.width / 2;
+          const y = rect.top + rect.height / 2 + 10;
+          spawnSparkles(x, y, 4);
+        });
+      });
+    }
+
+    function attachFrostEffect() {
+      document.querySelectorAll(".door").forEach(door => {
+        const existing = door.querySelector(".door-frost");
+        if (existing) existing.remove();
+        const frost = document.createElement("div");
+        frost.className = "door-frost";
+        door.appendChild(frost);
+        setTimeout(() => {
+          frost.classList.add("visible");
+        }, Math.random() * 2000 + 1000);
+      });
+    }
+
+    /* Splash snow animation */
+    function resizeSplashSnow() {
+      splashCanvas.width = window.innerWidth;
+      splashCanvas.height = window.innerHeight;
+    }
+    resizeSplashSnow();
+    window.addEventListener("resize", resizeSplashSnow);
+
+    let splashFlakes = Array.from({length: 120}, () => ({
+      x: Math.random() * splashCanvas.width,
+      y: Math.random() * splashCanvas.height,
+      r: Math.random() * 3 + 1,
+      speed: Math.random() * 0.8 + 0.4
+    }));
+
+    function drawSplashSnow() {
+      splashCtx.clearRect(0,0,splashCanvas.width,splashCanvas.height);
+      splashFlakes.forEach(f => {
+        const alpha = 0.7 + Math.sin(Date.now()/600 + f.x)/4;
+        splashCtx.fillStyle = "rgba(255,255,255,"+alpha+")";
+        splashCtx.beginPath();
+        splashCtx.ellipse(
+          f.x,
+          f.y,
+          f.r * 1.7,
+          f.r,
+          Math.sin(Date.now()/300 + f.y/50) * 0.4,
+          0,
+          Math.PI*2
+        );
+        splashCtx.fill();
+        f.y += f.speed;
+        f.x += Math.sin(Date.now()/800 + f.y/80) * 0.4;
+        if (f.y > splashCanvas.height) {
+          f.y = -5;
+          f.x = Math.random() * splashCanvas.width;
+        }
+        if (f.x < 0) f.x = splashCanvas.width;
+        if (f.x > splashCanvas.width) f.x = 0;
+      });
+      requestAnimationFrame(drawSplashSnow);
+    }
+    drawSplashSnow();
+
+    // Fade out splash after a few seconds
+    setTimeout(() => {
+      splash.style.transition = "opacity 1s";
+      splash.style.opacity = 0;
+      setTimeout(() => splash.style.display = "none", 1000);
+    }, 3000);
+
+    function openDoor(n) {
+      const d = days.find(x => x.day === n);
+      if (!d) return;
+
+      const doorEl = [...document.querySelectorAll(".door")]
+        .find(el => el.querySelector(".door-number").textContent == n);
+
+      if (doorEl) {
+        const frostEl = doorEl.querySelector(".door-frost");
+        if (frostEl) frostEl.classList.add("door-melt");
+        iceBurstOnDoor(doorEl);
+        doorEl.style.animation = "popOpen 0.5s ease-out";
+        setTimeout(() => { doorEl.style.animation = ""; }, 600);
+
+        const rect = doorEl.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        spawnSparkles(centerX, centerY, 10);
+        spawnHearts(centerX, centerY - 10, 5);
+      }
+
+      mascotSay(`Oooh! Day ${n} looks magical!`);
+
+      modalTitle.textContent = `Day ${n} – ${d.title}`;
+      modalBody.innerHTML = "";
+
+      if (d.type === "text") {
+        modalBody.textContent = d.description || "Merry Christmas!";
+      } else if (d.type === "image") {
+        if (d.url) {
+          const img = document.createElement("img");
+          img.src = d.url;
+          img.style.maxWidth = "100%";
+          img.style.borderRadius = "10px";
+          modalBody.appendChild(img);
+        } else {
+          modalBody.innerHTML = "<p class='error-text'>No image URL provided.</p>";
+        }
+      } else if (d.type === "pdf") {
+        if (d.url) {
+          const safeUrl = d.url;
+          modalBody.innerHTML = `
+            <p style="margin-bottom:8px;">
+              <a href="${safeUrl}" target="_blank" style="color:#38bdf8;text-decoration:underline;">
+                📄 Open this PDF in a new tab
+              </a>
+            </p>
+            <embed
+              src="${safeUrl}"
+              type="application/pdf"
+              style="width:100%;height:500px;border:1px solid #374151;border-radius:8px;"
+            >
+          `;
+        } else {
+          modalBody.innerHTML = "<p class='error-text'>No PDF URL provided.</p>";
+        }
+      } else if (d.type === "youtube") {
+        const id = extractYouTubeId(d.url || "");
+        if (id) {
+          modalBody.innerHTML = `
+            <iframe width="100%" height="400"
+              src="https://www.youtube.com/embed/${id}"
+              allowfullscreen style="border:0;"></iframe>`;
+        } else {
+          modalBody.innerHTML = "<p class='error-text'>Invalid or missing YouTube URL.</p>";
+        }
+      } else if (d.type === "link") {
+        if (d.url) {
+          modalBody.innerHTML = `
+            <p>${d.description || "Click the link below:"}</p>
+            <a href="${d.url}" target="_blank" style="color:#38bdf8;">${d.url}</a>
+          `;
+        } else {
+          modalBody.innerHTML = "<p class='error-text'>No link URL provided.</p>";
+        }
+      } else {
+        modalBody.innerHTML = "<p class='error-text'>Unknown content type.</p>";
+      }
+
+      d.opened = true;
+      saveDays(days);
+      renderCalendar();
+      attachFrostEffect();
+      attachDoorHoverMagic();
+      showModal();
+    }
+
+    function checkAssets() {
+      // Only splash is required now (no music)
+      const required = ["assets/splash.png"];
+      const missing = [];
+      required.forEach(path => {
+        const img = new Image();
+        img.onerror = () => {
+          missing.push(path);
+          reportMissing();
+        };
+        img.src = path + "?cacheBust=" + Math.random();
+      });
+      function reportMissing() {
+        if (missing.length === 0) return;
+        alert("Some required files are missing. Check the console for details.");
+        console.error("Missing assets:", missing);
+        const modal = document.getElementById("modalBackdrop");
+        const body = document.getElementById("modalBody");
+        const title = document.getElementById("modalTitle");
+        title.textContent = "Missing Required Assets";
+        body.innerHTML = `
+          <h3>⚠ Missing Assets Detected</h3>
+          <p>The following files could not be found:</p>
+          <ul>${missing.map(x => `<li>${x}</li>`).join("")}</ul>
+          <p>Please ensure the <strong>assets/</strong> folder is next to <strong>index.html</strong>.</p>
+        `;
+        modal.style.display = "flex";
+      }
+    }
+
+    function init() {
+      renderCalendar();
+      attachFrostEffect();
+      attachDoorHoverMagic();
+      initAdminForm();
+      updateView();
+      mascotSay("Welcome! Open a door when you're ready.");
+      checkAssets();
+    }
+
+    init();
+  </script>
+</body>
+</html>
+
